@@ -1,5 +1,32 @@
+/** @typedef {import("./matching.js").Meal} Meal */
+
+/**
+ * @typedef {Object} RequestOptions
+ * @property {AbortSignal} [signal] - Optionaler Abbruch durch den aufrufenden Code.
+ * @property {typeof fetch} [fetcher] - HTTP-Funktion; standardmässig fetch, in Tests ersetzbar.
+ */
+
+/**
+ * @typedef {Object} SearchOptions
+ * @property {AbortSignal} [signal] - Abbruchsignal für den gesamten Suchlauf.
+ * @property {(done: number, total: number) => void} [onProgress] - Meldung nach
+ *   jeder beendeten Detailaufgabe, einschliesslich fehlgeschlagener Aufgaben.
+ * @property {typeof fetch} [fetcher] - Optionaler HTTP-Ersatz für kontrollierte Tests.
+ */
+
 const BASE = "https://www.themealdb.com/api/json/v1/1/";
 const cache = new Map();
+/**
+ * Lädt ein API-Array per GET und speichert erfolgreiche Antworten im Sitzungscache.
+ * Kodiert Parameter, prüft HTTP-Status und JSON-Hülle und behandelt meals: null
+ * als leere Liste. Jede echte Anfrage hat ein Timeout von 18 Sekunden.
+ * @param {string} endpoint - Relativer API-Pfad, beispielsweise "filter.php".
+ * @param {Object<string, string>} params - Als Queryparameter zu sendende Werte.
+ * @param {RequestOptions} [options={}] - Abbruchsignal und optionaler HTTP-Ersatz.
+ * @returns {Promise<Array<Object>>} Einträge aus dem meals-Feld, ggf. aus dem Cache.
+ * @throws {Error} Bei HTTP-/Datenfehlern; JSON-, Netzwerk-, Timeout- und Abbruchfehler
+ *   werden als abgelehntes Promise weitergegeben.
+ */
 export async function request(
   endpoint,
   params,
@@ -26,6 +53,14 @@ export async function request(
   cache.set(key, data.meals ?? []);
   return data.meals ?? [];
 }
+/**
+ * Lädt den Zutatenkatalog, bereinigt Namen, entfernt identische Einträge und
+ * sortiert alphabetisch. Ein leerer Katalog wird aus dem Cache entfernt,
+ * damit ein weiterer Versuch neue Daten abrufen kann.
+ * @param {RequestOptions} [options] - Optionen für die HTTP-Anfrage.
+ * @returns {Promise<string[]>} Nichtleere, alphabetisch sortierte Zutatenliste.
+ * @throws {Error} Bei leerem Katalog oder einem Fehler der API-Anfrage.
+ */
 export async function getIngredients(options) {
   const rows = await request("list.php", { i: "list" }, options);
   const names = [
@@ -44,6 +79,15 @@ export async function getIngredients(options) {
   }
   return names;
 }
+/**
+ * Führt Aufgaben mit begrenzter Parallelität aus und sammelt auch Einzelfehler.
+ * Die Ergebnisreihenfolge entspricht der Eingabe, nicht der Abschlussreihenfolge.
+ * @template T, R
+ * @param {T[]} items - Zu verarbeitende Eingaben.
+ * @param {number} limit - Maximale Parallelität; muss eine positive ganze Zahl sein.
+ * @param {(item: T, index: number) => R|Promise<R>} task - Aufgabe pro Eingabe.
+ * @returns {Promise<PromiseSettledResult<R>[]>} Erfolg oder Fehler jeder Aufgabe.
+ */
 export async function pool(items, limit, task) {
   let cursor = 0;
   const results = new Array(items.length);
@@ -64,6 +108,13 @@ export async function pool(items, limit, task) {
   );
   return results;
 }
+/**
+ * Führt Rezept-IDs mehrerer Zutatenfilter zusammen und zählt Treffer pro Filter.
+ * Ungültige IDs und doppelte IDs innerhalb eines Filters werden übersprungen.
+ * Sortiert nach Treffern absteigend und anschliessend nach ID aufsteigend.
+ * @param {Array<Array<{idMeal?: string}|null>>} groups - API-Treffer je Suchzutat.
+ * @returns {Array<{id: string, hits: number}>} Eindeutige, priorisierte Kandidaten.
+ */
 export function rankCandidates(groups) {
   const candidates = new Map();
   for (const group of groups) {
@@ -86,6 +137,18 @@ export function rankCandidates(groups) {
     (a, b) => b.hits - a.hits || a.id.localeCompare(b.id),
   );
 }
+/**
+ * Sucht Rezeptkandidaten für mindestens eine Zutat mit ODER-Verknüpfung.
+ * Lädt höchstens 60 priorisierte Details mit bis zu vier gleichzeitigen Aufgaben.
+ * Teilausfälle bleiben im Ergebnis sichtbar; vollständige Ausfälle brechen die Suche ab.
+ * @param {string[]} ingredients - Nichtleere Liste der API-Zutatennamen.
+ * @param {SearchOptions} [options={}] - Abbruch, Fortschrittsmeldung und HTTP-Ersatz.
+ * @returns {Promise<{meals: Meal[], total: number, examined: number, failures: number}>}
+ *   Geladene Rezepte, Zahl aller Kandidaten, Zahl ausgewählter Details und Anzahl
+ *   fehlgeschlagener Filter-/Detailabfragen. Ohne Treffer sind die Listen leer.
+ * @throws {Error} Bei Abbruch, Ausfall aller Filter oder Ausfall aller ausgewählten
+ *   Details. Fehler einzelner Abfragen werden stattdessen im Ergebnis gezählt.
+ */
 export async function findRecipes(
   ingredients,
   { signal, onProgress = () => {}, fetcher } = {},

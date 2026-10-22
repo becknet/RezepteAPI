@@ -79,3 +79,37 @@ Nach Einrichtung ergänzen:
 - Datum und Ergebnis der Prüfung auf der öffentlichen Seite:
 
 E10 ist erst nach dem erfolgreichen öffentlichen Workflow und einer Prüfung der ausgelieferten App nachgewiesen. Persönliches Lernjournal, mündliche Erklärung und schulische Bewertung bleiben separate Leistungen.
+
+
+## Ergänzender Playwright-Test: Eier, Nüsse und Pasta
+
+Erneut am 22.10.2026 mit echten API-Daten geprüft. Separate Browserseiten verwendeten einen eigenen Storage-Schlüssel; vorhandene Nutzerdaten wurden nicht überschrieben. Die Testdaten wurden anschliessend entfernt.
+
+| Vorrat | Ergebnis der Live-Suche |
+| --- | --- |
+| Eggs | 101 Kandidaten; 60 untersucht und angezeigt. Begrenzung sichtbar. |
+| Walnuts | 11 Rezepte, unter anderem Walnut Stuffed Figs und Canadian Butter Tarts. |
+| Cashew Nuts | 3 Rezepte, unter anderem Cashew Ghoriba Biscuits und Tofu, greens & cashew stir-fry. |
+| Penne Pasta | Katalogeintrag existiert, aber API liefert keine Treffer; korrekter leerer Zustand. |
+| Spaghetti | 5 Rezepte, unter anderem Spaghetti alla Carbonara. |
+| Penne Rigate | 1 Rezept: Spicy Arrabiata Penne. |
+| Eggs + Walnuts + Penne Pasta | 108 Kandidaten; 60 geprüft und angezeigt. |
+| Eggs + Walnuts + Spaghetti | 113 Kandidaten; 60 geprüft und angezeigt, darunter Spaghetti alla Carbonara. |
+| Beispiel Tomatoes + Spaghetti | Beide Zutaten übernommen, 22 Rezeptkarten. |
+
+Die Zahlen sind Momentaufnahmen der externen Datenquelle. Die Suche verbindet Zutaten mit ODER und zeigt auch Rezepte, die nur eine der Zutaten enthalten.
+
+Zusätzlich geprüft:
+
+- In der ersten Testserie alle Karten-Zutatenzähler unabhängig mit den aufgezeichneten API-Rezeptdetails verglichen: keine Abweichung.
+- Rezept Home-made Mandazi geöffnet: drei fehlende Zutaten übernommen; genau drei Einkaufslisteneinträge. Einkaufshäkchen bleibt nach Reload gesetzt.
+- Alphabetische Sortierung überprüft; Favorit speichern und in Favoritenansicht öffnen erfolgreich.
+- Filter «Max. 2 fehlen» bei Eggs + Walnuts + Spaghetti liefert null Treffer; Rückkehr zu «Alle Rezepte» stellt die Karten wieder her. Dieser Fall bestätigt den leeren Filterzustand, nicht einen nichtleeren Filtertreffer.
+- Mobile Breite 390 px: kein horizontaler Überlauf.
+- Keine JavaScript-Laufzeitfehler und keine unerwartet fehlgeschlagenen Netzwerkanfragen in den regulären Testläufen.
+
+Gefundener und behobener Fehler: Der alte Beispielbutton «Tomatoes + Pasta» verwendete die nicht im Katalog vorhandene Zutat Pasta und verwarf sie stillschweigend. Jetzt verwendet er die nachweislich unterstützte Zutat Spaghetti. Falls eine Beispielzutat künftig fehlt, gibt die App einen Hinweis aus und übernimmt nicht stillschweigend nur einen Teil. Ein noch eingegebener Suchtext wird beim Auswählen eines Beispiels zurückgesetzt.
+
+Penne Pasta ist dagegen ein Datenproblem des Anbieters: Sowohl die Anfrage mit Leerzeichen als auch mit Unterstrich lieferte keine Rezepte. Die App behandelt dies als leeres Ergebnis. Es wurde keine automatische Gleichsetzung verschiedener Pastasorten eingeführt.
+
+Nach der Korrektur erneut erfolgreich: JavaScript-Syntaxprüfung, alle 18 automatisierten Tests und HTML-Validierung. Der Lighthouse-Lauf oben stammt aus der vorhergehenden Prüfung und wurde bei dieser Funktionserweiterungsprüfung nicht wiederholt.

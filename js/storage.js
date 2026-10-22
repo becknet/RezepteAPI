@@ -1,5 +1,20 @@
+/** @typedef {import("./matching.js").AppState} AppState */
+
 const KEY = "vorratskueche-v1";
+/**
+ * Erzeugt einen leeren App-Zustand mit neuen Arrays für jeden Aufruf.
+ * @returns {AppState} Unabhängiger Ausgangszustand ohne gespeicherte Nutzerdaten.
+ */
 const empty = () => ({ pantry: [], basics: [], favorites: [], shopping: [] });
+/**
+ * Liest den App-Schlüssel, parst JSON und übernimmt nur passend strukturierte Werte.
+ * Begrenzt den Vorrat auf sechs Einträge und erlaubt nur bekannte Grundzutaten.
+ * Ein fehlender Eintrag ist normal; Lese-/JSON-Fehler liefern einen leeren Zustand.
+ * @param {Pick<Storage, "getItem">} [storage] - Lesespeicher; standardmässig localStorage.
+ * @returns {{state: AppState, available: boolean}} Geladener/bereinigter Zustand.
+ *   available ist false bei nicht lesbaren oder ungültigen Daten; true beweist
+ *   nicht, dass späteres Schreiben möglich ist. Es werden keine Daten zurückgeschrieben.
+ */
 export function loadState(storage) {
   try {
     storage ??= globalThis.localStorage;
@@ -54,6 +69,13 @@ export function loadState(storage) {
     return { state: empty(), available: false };
   }
 }
+/**
+ * Serialisiert den Zustand als JSON und ersetzt ausschliesslich den App-Schlüssel.
+ * Fängt auch gesperrten Speicher und überschrittene Speicherquoten ab.
+ * @param {AppState} state - Zu speichernder App-Zustand.
+ * @param {Pick<Storage, "setItem">} [storage] - Schreibspeicher; standardmässig localStorage.
+ * @returns {boolean} true bei erfolgreicher Speicherung, sonst false.
+ */
 export function saveState(state, storage) {
   try {
     (storage ?? globalThis.localStorage).setItem(KEY, JSON.stringify(state));
@@ -62,6 +84,11 @@ export function saveState(state, storage) {
     return false;
   }
 }
+/**
+ * Entfernt ausschliesslich die gespeicherten Daten dieser App aus localStorage.
+ * Andere Schlüssel bleiben erhalten; der Zustand im Arbeitsspeicher bleibt unverändert.
+ * @returns {boolean} true bei erfolgreichem Entfernen, sonst false.
+ */
 export function clearState() {
   try {
     globalThis.localStorage.removeItem(KEY);
