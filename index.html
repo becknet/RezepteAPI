@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      name="description"
+      content="Entdecke Rezepte mit deinen vorhandenen Zutaten. Finde heraus, was du kochen kannst und was noch auf die Einkaufsliste gehört."
+   >
+    <meta name="theme-color" content="#284e36">
+    <title>Vorratsküche – Was koche ich heute?</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="vendor/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script type="module" src="js/app.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Zum Inhalt</a>
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="./" aria-label="Vorratsküche Startseite"
+          ><span class="brand-icon" aria-hidden="true">✳</span>
+          Vorratsküche<span class="brand-dot">.</span></a
+        >
+        <nav aria-label="Hauptnavigation" class="nav-pills-custom">
+          <button
+            type="button"
+            class="nav-button active"
+            data-view="search"
+            aria-current="page"
+          >
+            Entdecken
+          </button>
+          <button type="button" class="nav-button" data-view="favorites">
+            Favoriten <span id="favorite-count" class="count">0</span>
+          </button>
+          <button type="button" class="nav-button" data-view="shopping">
+            Einkaufsliste <span id="shopping-count" class="count">0</span>
+          </button>
+        </nav>
+      </div>
+    </header>
+    <main id="main" class="container" tabindex="-1">
+      <section id="search-view" aria-labelledby="hero-title">
+        <div class="hero">
+          <div>
+            <p class="eyebrow">GUTE IDEEN BEGINNEN IM VORRATSSCHRANK</p>
+            <h1 id="hero-title">
+              Schon etwas da.<br><span>Mach etwas draus.</span>
+            </h1>
+            <p class="hero-copy">
+              Was hast du zu Hause? Entdecke passende Rezepte<br
+                class="desktop-break"
+             >
+              und finde heraus, was noch fehlt.
+            </p>
+            <div class="hero-meta">
+              <span>✓ Weniger suchen</span><span>✓ Mehr verwerten</span
+              ><span>✓ Einfach kochen</span>
+            </div>
+          </div>
+          <div class="hero-art" aria-hidden="true">
+            <div class="plate">
+              <span class="leaf l1"></span><span class="leaf l2"></span
+              ><span class="leaf l3"></span><span class="tomato t1"></span
+              ><span class="tomato t2"></span><span class="tomato t3"></span
+              ><span class="pasta p1"></span><span class="pasta p2"></span
+              ><span class="pasta p3"></span><span class="pasta p4"></span>
+            </div>
+            <span class="art-label"
+              >Ein bisschen Vorrat.<br>Viele Möglichkeiten.</span
+            >
+          </div>
+        </div>
+        <div class="workspace">
+          <aside class="pantry-panel" aria-labelledby="pantry-title">
+            <div class="section-kicker">01 / DEIN VORRAT</div>
+            <h2 id="pantry-title">Was ist schon da?</h2>
+            <p class="muted small">
+              Wähle bis zu 6 Zutaten. Die Rezeptdaten und Zutatennamen sind auf
+              Englisch.
+            </p>
+            <form id="pantry-form" novalidate>
+              <label class="form-label" for="ingredient-input"
+                >Zutat hinzufügen</label
+              >
+              <div class="input-group">
+                <input
+                  type="text"
+                  id="ingredient-input"
+                  class="form-control"
+                  list="ingredient-options"
+                  placeholder="z. B. Chicken, Rice …"
+                  autocomplete="off"
+                  maxlength="100"
+                  aria-describedby="ingredient-help ingredient-error"
+                  required
+                  disabled
+               ><button
+                  id="add-ingredient"
+                  class="btn btn-add"
+                  type="button"
+                  aria-label="Zutat hinzufügen"
+                  disabled
+                >
+                  +
+                </button>
+              </div>
+              <datalist id="ingredient-options"></datalist>
+              <p id="ingredient-help" class="small muted mt-2">
+                Zutaten werden geladen …
+              </p>
+              <p id="ingredient-error" class="field-error" role="alert"></p>
+              <button
+                id="retry-ingredients"
+                type="button"
+                class="text-button"
+                hidden
+              >
+                Erneut laden
+              </button>
+              <div
+                id="pantry-chips"
+                class="chips"
+                role="group"
+                aria-label="Ausgewählte Zutaten"
+              ></div>
+              <div class="basics">
+                <fieldset>
+                  <legend>
+                    Die Basics <span class="muted">(optional)</span>
+                  </legend>
+                  <div class="basic-options">
+                    <label
+                      ><input
+                        type="checkbox"
+                        value="Salt"
+                        name="basic-salt"
+                        data-basic
+                     >
+                      Salz</label
+                    ><label
+                      ><input
+                        type="checkbox"
+                        value="Pepper"
+                        name="basic-pepper"
+                        data-basic
+                     >
+                      Pfeffer</label
+                    ><label
+                      ><input
+                        type="checkbox"
+                        value="Olive Oil"
+                        name="basic-oil"
+                        data-basic
+                     >
+                      Olivenöl</label
+                    >
+                  </div>
+                </fieldset>
+              </div>
+              <button
+                type="submit"
+                class="btn btn-primary search-button"
+                id="search-button"
+              >
+                Rezepte entdecken <span aria-hidden="true">↗</span>
+              </button>
+            </form>
+            <p class="pantry-footnote">
+              Wir vergleichen Zutaten, keine Mengen. Prüfe vor dem Kochen, ob
+              dein Vorrat ausreicht.
+            </p>
+          </aside>
+          <section
+            id="results-panel"
+            class="results-panel"
+            aria-labelledby="results-title"
+          >
+            <div class="results-heading">
+              <div>
+                <div class="section-kicker">02 / DEINE MÖGLICHKEITEN</div>
+                <h2 id="results-title">Das könnte es werden.</h2>
+              </div>
+              <span id="result-count" class="result-count"></span>
+            </div>
+            <div id="results-tools" class="results-tools" hidden>
+              <fieldset class="filter-group">
+                <legend class="visually-hidden">
+                  Nach fehlenden Zutaten filtern
+                </legend>
+                <label
+                  ><input type="radio" name="filter" value="all" checked><span
+                    >Alle Rezepte</span
+                  ></label
+                ><label
+                  ><input type="radio" name="filter" value="2"><span
+                    >Max. 2 fehlen</span
+                  ></label
+                ><label
+                  ><input type="radio" name="filter" value="0"><span
+                    >Alles da</span
+                  ></label
+                >
+              </fieldset>
+              <label class="sort-label"
+                >Sortieren
+                <select id="sort-select" class="form-select form-select-sm">
+                  <option value="missing">Wenigste fehlen</option>
+                  <option value="available">Meiste vorhanden</option>
+                  <option value="name">Name A–Z</option>
+                </select></label
+              >
+            </div>
+            <p
+              id="search-status"
+              class="status"
+              role="status"
+              aria-live="polite"
+            ></p>
+            <div id="results-grid" class="recipe-grid"></div>
+            <div id="initial-state" class="empty-state">
+              <span class="empty-icon" aria-hidden="true">↗</span>
+              <h3>Dein Vorrat ist der Anfang.</h3>
+              <p>
+                Füge links deine Zutaten hinzu.<br>Wir finden die passenden
+                Rezeptideen dazu.
+              </p>
+              <div class="example-line">
+                Zum Beispiel:
+                <button
+                  type="button"
+                  class="example-button"
+                  data-example="Chicken,Rice"
+                >
+                  Chicken + Rice
+                </button>
+                <span>oder</span>
+                <button
+                  type="button"
+                  class="example-button"
+                  data-example="Tomatoes,Pasta"
+                >
+                  Tomatoes + Pasta
+                </button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+      <section
+        id="favorites-view"
+        class="saved-view"
+        hidden
+        aria-labelledby="favorites-title"
+      >
+        <p class="eyebrow">DEINE SAMMLUNG</p>
+        <h1 id="favorites-title">Zum Wiederkochen.</h1>
+        <p class="muted">
+          Deine Lieblingsrezepte, auf diesem Gerät gespeichert.
+        </p>
+        <div id="favorites-grid" class="recipe-grid"></div>
+      </section>
+      <section
+        id="shopping-view"
+        class="saved-view"
+        hidden
+        aria-labelledby="shopping-title"
+      >
+        <p class="eyebrow">FÜR DEN NÄCHSTEN EINKAUF</p>
+        <h1 id="shopping-title">Das fehlt noch.</h1>
+        <p class="muted">
+          Mengen bleiben im Original und sind ihrem Rezept zugeordnet.
+        </p>
+        <div class="shopping-toolbar">
+          <button id="clear-checked" class="btn btn-outline-dark" type="button">
+            Erledigte entfernen</button
+          ><span id="shopping-summary"></span>
+        </div>
+        <div id="shopping-list"></div>
+      </section>
+      <p id="storage-warning" class="notice" role="status" hidden>
+        Der Browserspeicher ist nicht verfügbar. Änderungen bleiben nur bis zum
+        Schliessen dieser Seite erhalten.
+      </p>
+    </main>
+    <footer class="container site-footer">
+      <span>Vorratsküche. Aus Vorhandenem wird Gutes.</span>
+      <div>
+        <a
+          href="https://www.themealdb.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Rezepte von TheMealDB ↗</a
+        ><button id="privacy-button" class="text-button" type="button">
+          Datenschutz &amp; Hinweise
+        </button>
+      </div>
+    </footer>
+    <dialog id="recipe-dialog" aria-labelledby="recipe-title">
+      <button
+        class="dialog-close"
+        id="close-recipe"
+        aria-label="Rezept schliessen"
+        type="button"
+      >
+        ×
+      </button>
+      <div id="recipe-content"></div>
+    </dialog>
+    <dialog id="privacy-dialog" aria-labelledby="privacy-title">
+      <button
+        class="dialog-close"
+        id="close-privacy"
+        aria-label="Hinweise schliessen"
+        type="button"
+      >
+        ×
+      </button>
+      <div class="dialog-body">
+        <p class="eyebrow">GUT ZU WISSEN</p>
+        <h2 id="privacy-title">Datenschutz &amp; Hinweise</h2>
+        <p>
+          Vorrat, Favoriten und Einkaufsliste werden lokal in deinem Browser
+          gespeichert. Es gibt kein Benutzerkonto und keine Analyse- oder
+          Trackingdienste.
+        </p>
+        <p>
+          Beim Laden von Zutaten und Rezepten verbindet sich dein Browser mit
+          TheMealDB. Dabei werden unter anderem deine IP-Adresse und die
+          abgefragten Zutaten an diesen Anbieter übermittelt. Rezeptbilder
+          werden ebenfalls von dort geladen. Videos öffnen erst nach einem Klick
+          auf YouTube.
+        </p>
+        <p>
+          Rezepte und Mengen werden im englischen Original angezeigt. Der
+          Vergleich erkennt keine Allergene, Ernährungsanforderungen oder
+          ausreichenden Vorratsmengen. Prüfe Zutaten und Zubereitung selbst.
+        </p>
+        <p>
+          Die Suche untersucht bis zu 60 Rezeptkandidaten. Sie durchsucht nicht
+          garantiert die gesamte Datenbank. Gleiche Zutaten in anderer
+          Schreibweise können als fehlend erscheinen.
+        </p>
+        <button id="delete-local" type="button" class="btn btn-outline-danger">
+          Lokale App-Daten löschen
+        </button>
+        <p id="delete-status" role="status"></p>
+        <p class="small mt-3">
+          <a
+            href="https://www.themealdb.com/privacy_policy.php"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Datenschutzhinweise von TheMealDB</a
+          >
+        </p>
+      </div>
+    </dialog>
+    <div
+      id="toast"
+      class="toast-message"
+      role="status"
+      aria-live="polite"
+    ></div>
+  </body>
+</html>

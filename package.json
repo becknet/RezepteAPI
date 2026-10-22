@@ -1,0 +1,12 @@
+{
+  "name": "vorratskueche",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Vorratsbasierte Rezepte-App für Modul 291",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "check": "node --check js/app.js && node --check js/api.js && node --check js/matching.js && node --check js/storage.js",
+    "serve": "python3 -m http.server 8080"
+  }
+}
